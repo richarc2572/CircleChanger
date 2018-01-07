@@ -4,14 +4,15 @@ A problem in which to practice:
   -- using SEQUENCES
 
 Authors: Valerie Galluzzi, David Mutchler, Dave Fisher, Amanda Stouder,
-         their colleagues and PUT_YOUR_NAME_HERE.
-"""  # TODO: 1. PUT YOUR NAME IN THE ABOVE LINE.
+         their colleagues and Clayton Richards.
+"""  # DONE: 1. PUT YOUR NAME IN THE ABOVE LINE.
 
 import rosegraphics as rg
 import random
 import sys
 import time
 import m1t_test_CircleChanger as m1_tests
+
 
 ########################################################################
 # IMPORTANT:
@@ -92,7 +93,7 @@ class CircleChanger(object):
         # --------------------------------------------------------------
 
         ################################################################
-        # TODO: 2.
+        # DONE: 2.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_init   function (below).
         #   Third, implement and test this method.
@@ -101,6 +102,13 @@ class CircleChanger(object):
         # the SPECIFICATION of the method.  That is why you read the
         # TEST function before implementing the method that it tests.
         ################################################################
+        center = rg.Point(x, y)
+        circle = rg.Circle(center, radius)
+        circle.fill_color = fill_color
+        self.circle = circle
+        self.colors = colors
+        self.original_color = fill_color
+        self.color_index = 0
 
     def __repr__(self):
         """
@@ -192,7 +200,7 @@ class CircleChanger(object):
             :type point: rg.Point
         """
         ################################################################
-        # TODO: 3.
+        # DONE: 3.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_get_distance_from   function
         #   (below).  Third, implement and test this method.
@@ -201,6 +209,7 @@ class CircleChanger(object):
         #   of the    rg.Point     class to compute this distance.
         #   NO CREDIT if you use the distance formula here.
         ################################################################
+        return point.get_distance_from(self.circle.center)
 
     def swell_or_shrink_once(self, amount_to_swell_or_shrink):
         """
@@ -237,7 +246,7 @@ class CircleChanger(object):
             :type amount_to_swell_or_shrink: int
         """
         ################################################################
-        # TODO: 4.
+        # DONE: 4.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_swell_or_shrink_once   function
         #   (below).  Third, implement and test this method.
@@ -265,6 +274,13 @@ class CircleChanger(object):
         #   Simply   ** ASK FOR HELP **
         #            if this does not make sense to you.
         ################################################################
+        self.circle.radius = self.circle.radius + amount_to_swell_or_shrink
+        if self.circle.radius < 1:
+            self.circle.radius = 1
+        self.circle.outline_thickness = random.randrange(3, 16)
+        r_index = random.randrange(0, len(self.colors))
+        r_color = self.colors[r_index]
+        self.circle.fill_color = r_color
 
     def swell_or_shrink_repeatedly(self,
                                    amount_to_swell_or_shrink,
@@ -319,11 +335,16 @@ class CircleChanger(object):
             :type times_to_swell_or_shrink:  int
         """
         ################################################################
-        # TODO: 5.
+        # DONE: 5.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the  run_test_swell_or_shrink_repeatedly  function
         #   (below).  Third, implement and test this method.
         ################################################################
+        for _ in range(times_to_swell_or_shrink):
+            self.swell_or_shrink_once(amount_to_swell_or_shrink)
+            self.draw()
+            self.swell_or_shrink_once(amount_to_swell_or_shrink * -1)
+            self.draw()
 
     def swallow(self, other_circle_changer):
         """
@@ -351,7 +372,7 @@ class CircleChanger(object):
             :rtype CircleChanger
         """
         ################################################################
-        # TODO: 6.
+        # DONE: 6.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_swallow   function (below).
         #   Third, implement and test this method.
@@ -361,6 +382,14 @@ class CircleChanger(object):
         #   the center and radius of the new CircleChanger.
         #   NO CREDIT if you use the distance formula here.
         ################################################################
+        center = self.circle.center.halfway_to(
+            other_circle_changer.circle.center)
+        x = center.x
+        y = center.y
+        radius = self.get_distance_from(other_circle_changer.circle.center) / 2
+        fill_color = 'red'
+        colors = self.colors + other_circle_changer.colors
+        return CircleChanger(x, y, radius, fill_color, colors)
 
     def change_color(self, index_of_color):
         """
@@ -382,11 +411,12 @@ class CircleChanger(object):
             :type index_of_color: int
         """
         ################################################################
-        # TODO: 7.
+        # DONE: 7.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_change_color   function (below).
         #   Third, implement and test this method.
         ################################################################
+        self.circle.fill_color = self.colors[index_of_color]
 
     def change_to_original_color(self):
         """
@@ -399,11 +429,12 @@ class CircleChanger(object):
                was constructed.
         """
         ################################################################
-        # TODO: 8.
+        # DONE: 8.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_change_to_original_color   function
         #   (below).  Third, implement and test this method.
         ################################################################
+        self.circle.fill_color = self.original_color
 
     def change_to_next_color_in_tuple(self):
         """
@@ -438,11 +469,15 @@ class CircleChanger(object):
         fill color have no effect on or interaction with this method.
         """
         ################################################################
-        # TODO: 9.
+        # DONE: 9.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_change_to_next_color_in_tuple
         #   function (below).  Third, implement and test this method.
         ################################################################
+        self.circle.fill_color = self.colors[self.color_index]
+        self.color_index = self.color_index + 1
+        if self.color_index == len(self.colors):
+            self.color_index = 0
 
 
 ########################################################################
@@ -457,7 +492,8 @@ def run_test_init():
     m1_tests.start_drawing('Testing: the   __init__   method')
 
     # Construct two CircleChanger objects:
-    circle_changer1 = CircleChanger(100, 150, 100, 'blue', ('red', 'blue', 'green'))
+    circle_changer1 = CircleChanger(100, 150, 100, 'blue',
+                                    ('red', 'blue', 'green'))
     circle_changer2 = CircleChanger(300, 50, 30, 'yellow', ('green', 'gold'))
 
     # Print and draw them:
@@ -522,7 +558,7 @@ def run_test_swell_or_shrink_once():
     print('After construction:')
     circle_changer1 = CircleChanger(200, 150, 30, 'blue',
                                     ('blue', 'yellow', 'green',
-                                        'aquamarine', 'brown'))
+                                     'aquamarine', 'brown'))
     print(circle_changer1)
     circle_changer1.draw()
 
@@ -556,6 +592,7 @@ def run_test_swell_or_shrink_once():
     Left circle is bigger (radius 130), still BLUE but thickness 13,
     Right circle is smaller (radius 20), GREEN with thickness 3,
     Middle circle is bigger (radius 50), YELLOW with thickness 6.""")
+
 
 #     # Apply the   swell_or_shrink_once  method to each a second time:
 #     circle_changer1.swell_or_shrink_once(-80)
@@ -595,7 +632,7 @@ def run_test_swell_or_shrink_repeatedly():
     print('After construction:')
     circle_changer1 = CircleChanger(200, 150, 30, 'blue',
                                     ('blue', 'yellow', 'green',
-                                        'aquamarine', 'brown'))
+                                     'aquamarine', 'brown'))
     print(circle_changer1)
     circle_changer1.draw("""
     A BLUE circle at (200, 150) with radius 30 and thickness 1.""")
@@ -707,7 +744,7 @@ def run_test_change_color():
     print(circle_changer1)
     circle_changer2 = CircleChanger(350, 130, 50, 'purple',
                                     ('yellow', 'magenta', 'blue',
-                                        'green', 'yellow', 'aquamarine'))
+                                     'green', 'yellow', 'aquamarine'))
     print(circle_changer2)
     circle_changer2.draw("""
     A BLACK circle at (100, 100) with radius 70,
@@ -775,7 +812,7 @@ def run_test_change_to_original_color():
     print(circle_changer1)
     circle_changer2 = CircleChanger(280, 100, 100, 'purple',
                                     ('yellow', 'magenta', 'blue',
-                                        'green', 'yellow', 'aquamarine'))
+                                     'green', 'yellow', 'aquamarine'))
     print(circle_changer2)
     circle_changer2.draw("""
     A BLACK circle at (100, 100) with radius 100,
@@ -805,7 +842,7 @@ def run_test_change_to_original_color():
 
 def run_test_change_to_next_color_in_tuple():
     """ Tests the   change_to_next_color_in_tuple   method. """
-#     m1_tests.change_to_next_color()  # This runs OUR tests.
+    #     m1_tests.change_to_next_color()  # This runs OUR tests.
 
     # This is a VISUAL test.
     # Construct 2 CircleChanger objects, printing and drawing them.
@@ -819,7 +856,7 @@ def run_test_change_to_next_color_in_tuple():
     print(circle_changer1)
     circle_changer2 = CircleChanger(280, 100, 40, 'purple',
                                     ('yellow', 'magenta', 'blue',
-                                        'green', 'yellow', 'aquamarine'))
+                                     'green', 'yellow', 'aquamarine'))
     print(circle_changer2)
     circle_changer2.draw("""
     A BLACK circle at (100, 100) with radius 100,
